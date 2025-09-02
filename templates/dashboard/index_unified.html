@@ -1,0 +1,255 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}儀表板 - 一口口麻辣串記帳系統{% endblock %}
+
+{% block page_css %}
+/* 儀表板頁面特定樣式 */
+.welcome-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px;
+    border-radius: 20px;
+    margin-bottom: 30px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.welcome-section h1 {
+    font-size: 2.5em;
+    font-weight: 700;
+    margin-bottom: 15px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.welcome-section p {
+    font-size: 1.2em;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.feature-card {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.feature-card.accounting::before {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.feature-card.cost::before {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+}
+
+.feature-card.profit::before {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+}
+
+.feature-card.user::before {
+    background: linear-gradient(135deg, #17a2b8, #6f42c1);
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.feature-icon {
+    font-size: 3em;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.feature-card h3 {
+    color: #495057;
+    font-size: 1.4em;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.feature-card p {
+    color: #6c757d;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+.feature-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.feature-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+    color: white;
+}
+
+.feature-card.accounting .feature-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.feature-card.cost .feature-btn {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+}
+
+.feature-card.profit .feature-btn {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+}
+
+.feature-card.user .feature-btn {
+    background: linear-gradient(135deg, #17a2b8, #6f42c1);
+}
+
+/* 深色主題特定樣式 */
+[data-theme="dark"] .welcome-section {
+    background: var(--bg-nav) !important;
+    border: 2px solid var(--border-color) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--accent-purple) !important;
+}
+
+[data-theme="dark"] .feature-card {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary)) !important;
+    border: 2px solid var(--border-color) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent-blue) !important;
+}
+
+[data-theme="dark"] .feature-card:hover {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4), 0 0 0 2px var(--accent-purple) !important;
+}
+
+[data-theme="dark"] .feature-card h3 {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .feature-card p {
+    color: var(--text-secondary) !important;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .welcome-section {
+        padding: 30px 20px;
+    }
+    
+    .welcome-section h1 {
+        font-size: 2em;
+    }
+    
+    .welcome-section p {
+        font-size: 1.1em;
+    }
+    
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .feature-card {
+        padding: 25px;
+    }
+}
+{% endblock %}
+
+{% block page_header %}
+<div class="welcome-section">
+    <h1>歡迎回來, {{ user.first_name|default:user.username }} !</h1>
+    <p>這是您的麻辣燙店記帳系統管理後台。快速管理記帳、成本、利潤分析等核心業務功能。</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="features-grid">
+    <!-- 記帳管理 -->
+    <div class="feature-card accounting">
+        <span class="feature-icon">💰</span>
+        <h3>記帳管理</h3>
+        <p>記錄每日銷售收入、客戶訂單、營業額統計</p>
+        <a href="{% url 'sales_management' %}" class="feature-btn">開始記帳</a>
+    </div>
+    
+    <!-- 成本管理 -->
+    <div class="feature-card cost">
+        <span class="feature-icon">📋</span>
+        <h3>成本管理</h3>
+        <p>管理原料成本、人工費用、營運支出等各項成本</p>
+        <a href="{% url 'cost_management' %}" class="feature-btn">管理成本</a>
+    </div>
+    
+    <!-- 利潤分析 -->
+    <div class="feature-card profit">
+        <span class="feature-icon">📈</span>
+        <h3>利潤分析</h3>
+        <p>查看毛利計算、利潤報表、營運分析等關鍵指標</p>
+        <a href="{% url 'profit_analysis' %}" class="feature-btn">分析利潤</a>
+    </div>
+    
+    <!-- 用戶管理 -->
+    <div class="feature-card user">
+        <span class="feature-icon">👥</span>
+        <h3>用戶管理</h3>
+        <p>管理員工帳號、權限設定、角色分配</p>
+        <a href="{% url 'user_management' %}" class="feature-btn">管理用戶</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+// 儀表板頁面特定JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    // 為功能卡片添加動畫效果
+    const featureCards = document.querySelectorAll('.feature-card');
+    
+    featureCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 150);
+    });
+    
+    // 添加點擊統計功能（可選）
+    featureCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const featureName = this.querySelector('h3').textContent;
+            console.log(`用戶點擊了: ${featureName}`);
+        });
+    });
+});
+{% endblock %}

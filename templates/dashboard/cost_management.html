@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成本管理 - 一口口麻辣串記帳系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        /* 主題切換按鈕 */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 12px 20px;
+            color: white;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        /* 深色主題樣式 */
+        [data-theme="dark"] {
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --bg-nav: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            --text-primary: #e8e8e8;
+            --text-secondary: #b8b8cc;
+            --text-muted: #8a8a9a;
+            --border-color: #2a2a3e;
+            --shadow: rgba(0, 0, 0, 0.4);
+            --accent-purple: #6366f1;
+            --accent-blue: #3b82f6;
+        }
+        
+        [data-theme="dark"] body {
+            background: var(--bg-primary) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] .container {
+            background: var(--bg-primary) !important;
+        }
+        
+        [data-theme="dark"] .main-content {
+            background: var(--bg-primary) !important;
+        }
+        
+        [data-theme="dark"] .content-wrapper {
+            background: var(--bg-primary) !important;
+        }
+        
+        /* 強制覆蓋所有可能的白色背景 */
+        [data-theme="dark"] {
+            background: var(--bg-primary) !important;
+        }
+        
+        [data-theme="dark"] body, [data-theme="dark"] html {
+            background: var(--bg-primary) !important;
+        }
+        
+        [data-theme="dark"] .container, [data-theme="dark"] .main-content, [data-theme="dark"] .content-wrapper {
+            background: var(--bg-primary) !important;
+        }
+        
+        /* 確保所有div元素都有深色背景 */
+        [data-theme="dark"] div {
+            background: var(--bg-primary) !important;
+        }
+        
+        /* 確保所有文字都是淺色 */
+        [data-theme="dark"] * {
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] h1, h2, h3, h4, h5, h6 {
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] p, span, div, td, th {
+            color: var(--text-primary) !important;
+        }
+        
+        /* 修復圖片和圖標顯示 */
+        [data-theme="dark"] img {
+            filter: brightness(1.2) contrast(1.1) !important;
+        }
+        
+        [data-theme="dark"] .btn {
+            color: white !important;
+            background: var(--accent-purple) !important;
+        }
+        
+        [data-theme="dark"] .btn:hover {
+            color: white !important;
+            background: var(--accent-blue) !important;
+        }
+        
+        /* 增強區塊邊界和分隔效果 */
+        [data-theme="dark"] .card {
+            border: 2px solid var(--border-color) !important;
+            border-radius: 15px !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent-purple) !important;
+            margin: 15px !important;
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary)) !important;
+        }
+        
+        [data-theme="dark"] .navbar {
+            background: var(--bg-nav) !important;
+            border-bottom: 3px solid var(--accent-purple) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        [data-theme="dark"] .nav-logo h1 {
+            border-bottom: 2px solid var(--accent-purple) !important;
+            padding-bottom: 8px !important;
+            margin-bottom: 0 !important;
+            display: inline-block !important;
+        }
+        
+        [data-theme="dark"] .nav-logo {
+            border-bottom: 2px solid var(--accent-purple) !important;
+            padding-bottom: 8px !important;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        .nav-logo h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.95em;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: fit-content;
+        }
+        
+        .nav-menu a:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        .nav-menu a.active {
+            background: rgba(255,255,255,0.3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+                 .nav-user {
+             display: flex;
+             align-items: center;
+             gap: 15px;
+         }
+         
+         .nav-user span {
+             color: rgba(255, 255, 255, 0.9);
+             font-weight: 500;
+             font-size: 0.95em;
+         }
+         
+         .logout-btn {
+             background: rgba(255, 255, 255, 0.15);
+             color: white;
+             padding: 8px 16px;
+             border: 2px solid rgba(255, 255, 255, 0.3);
+             border-radius: 20px;
+             text-decoration: none;
+             font-weight: 500;
+             font-size: 0.9em;
+             transition: all 0.3s ease;
+             backdrop-filter: blur(10px);
+             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+         }
+         
+         .logout-btn:hover {
+             background: rgba(255, 255, 255, 0.25);
+             border-color: rgba(255, 255, 255, 0.5);
+             transform: translateY(-2px);
+             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+         }
+         
+         .logout-btn:active {
+             transform: translateY(0);
+             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+         }
+         
+         /* 響應式設計 - 登出按鈕 */
+         @media (max-width: 768px) {
+             .nav-user {
+                 flex-direction: column;
+                 gap: 10px;
+                 align-items: flex-end;
+             }
+             
+             .logout-btn {
+                 padding: 6px 12px;
+                 font-size: 0.85em;
+             }
+         }
+        
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .page-header {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .page-header h2 {
+            color: #667eea;
+            margin: 0;
+        }
+        
+        .add-cost-btn {
+            background: #28a745;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .add-cost-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .costs-table {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .table-header h3 {
+            color: #667eea;
+            margin: 0;
+        }
+        
+        .table-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .search-input {
+            padding: 8px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 0.9em;
+            min-width: 200px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .category-filter {
+            padding: 8px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 0.9em;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+        
+        .category-filter:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9em;
+            margin-right: 5px;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 0.8em;
+            margin-right: 3px;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .amount {
+            font-weight: 600;
+            color: #28a745;
+        }
+        
+        .category-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+            text-align: center;
+            display: inline-block;
+            min-width: 60px;
+        }
+        
+        .category-食材 {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .category-營運費用 {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .category-人工 {
+            background: #e8f5e8;
+            color: #388e3c;
+        }
+        
+        .category-水電 {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .category-租金 {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+        
+        .category-其他 {
+            background: #f5f5f5;
+            color: #616161;
+        }
+        
+        .actions {
+            white-space: nowrap;
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .table-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .table-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .search-input {
+                min-width: auto;
+            }
+            
+            .costs-table {
+                overflow-x: auto;
+            }
+            
+            table {
+                min-width: 600px;
+            }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        
+        .empty-state h4 {
+            margin-bottom: 15px;
+            color: #495057;
+        }
+        
+        /* Messages 樣式 */
+        .messages {
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .message-success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        
+        .message-error {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .message-warning {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .message-info {
+            background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        /* 彈出視窗樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .modal-header h3 {
+            color: #667eea;
+            margin: 0;
+            font-size: 1.5em;
+        }
+        
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .close:hover {
+            color: #667eea;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #495057;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+        
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cancel:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .btn-submit {
+            background: #28a745;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-submit:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- 主題切換按鈕 -->
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <span id="theme-icon">🌙</span>
+        <span id="theme-text">深色</span>
+    </button>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h1>🔥 一口口麻辣串記帳系統</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="{% url 'dashboard' %}">📊 儀表板</a>
+                <a href="{% url 'sales_management' %}">💰 記帳管理</a>
+                <a href="{% url 'cost_management' %}" class="active">📝 成本管理</a>
+                <a href="{% url 'profit_analysis' %}">📈 利潤分析</a>
+                <a href="{% url 'user_management' %}">👥 使用者管理</a>
+            </div>
+                         <div class="nav-user">
+                 <span>歡迎，{{ user.username }}</span>
+                 <a href="{% url 'custom_logout' %}" class="logout-btn">🚪 登出</a>
+             </div>
+        </div>
+    </nav>
+
+    {% load cost_filters %}
+    
+    <div class="main-container">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message message-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="page-header">
+            <h2>📝 成本管理</h2>
+            <button class="add-cost-btn" onclick="openAddCostModal()">➕ 新增</button>
+        </div>
+
+        <div class="costs-table">
+            <div class="table-header">
+                <h3>成本記錄</h3>
+                <div class="table-controls">
+                    <input type="text" id="searchInput" placeholder="🔍 搜尋品項名稱..." class="search-input">
+                    <select id="categoryFilter" class="category-filter">
+                        <option value="">所有類別</option>
+                        <option value="食材">食材</option>
+                        <option value="營運費用">營運費用</option>
+                        <option value="人工">人工</option>
+                        <option value="水電">水電</option>
+                        <option value="租金">租金</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+            </div>
+            {% if recent_costs %}
+                                 <table>
+                     <thead>
+                         <tr>
+                             <th>日期</th>
+                             <th>品項名稱</th>
+                             <th>類別</th>
+                             <th>成本</th>
+                             <th>單位</th>
+                             <th>說明</th>
+                             <th>記錄人員</th>
+                             <th>操作</th>
+                         </tr>
+                     </thead>
+                     <tbody>
+                         {% for cost in recent_costs %}
+                         <tr>
+                             <td>{{ cost.date|date:"Y-m-d H:i" }}</td>
+                             <td class="item-name">{{ cost.description|get_item_name }}</td>
+                             <td><span class="category-badge category-{{ cost.category }}">{{ cost.get_category_display }}</span></td>
+                             <td class="amount">${{ cost.amount }}</td>
+                             <td>{{ cost.description|get_unit }}</td>
+                             <td>{{ cost.description|get_notes }}</td>
+                             <td>{{ cost.recorded_by.username }}</td>
+                             <td class="actions">
+                                 <button class="btn btn-primary btn-sm" onclick="viewCost({{ cost.id }})">👁️</button>
+                                 <button class="btn btn-warning btn-sm" onclick="editCost({{ cost.id }})">✏️</button>
+                                 <button class="btn btn-danger btn-sm" onclick="deleteCost({{ cost.id }})">🗑️</button>
+                             </td>
+                         </tr>
+                         {% endfor %}
+                     </tbody>
+                 </table>
+            {% else %}
+                                 <div class="empty-state">
+                     <h4>尚無成本記錄</h4>
+                     <p>點擊上方的「新增」按鈕開始記錄固定成本項目</p>
+                 </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 新增成本彈出視窗 -->
+    <div id="addCostModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>➕ 新增成本項目</h3>
+                <span class="close" onclick="closeAddCostModal()">&times;</span>
+            </div>
+            
+            <form id="addCostForm" method="POST" action="{% url 'add_cost' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="item_name">品項名稱 *</label>
+                    <input type="text" id="item_name" name="item_name" required placeholder="請輸入品項名稱">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="amount">成本 *</label>
+                        <input type="number" id="amount" name="amount" step="0.01" min="0" required placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="unit">單位</label>
+                        <input type="text" id="unit" name="unit" placeholder="如：公斤、包、個">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="category">類別</label>
+                    <select id="category" name="category">
+                        <option value="食材">食材</option>
+                        <option value="營運費用">營運費用</option>
+                        <option value="人工">人工</option>
+                        <option value="水電">水電</option>
+                        <option value="租金">租金</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">說明</label>
+                    <input type="text" id="description" name="description" placeholder="額外說明或備註">
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeAddCostModal()">取消</button>
+                    <button type="submit" class="btn-submit">新增成本</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openAddCostModal() {
+            document.getElementById('addCostModal').style.display = 'block';
+        }
+        
+        function closeAddCostModal() {
+            document.getElementById('addCostModal').style.display = 'none';
+            // 清空表單
+            document.getElementById('addCostForm').reset();
+        }
+        
+        // 點擊彈出視窗外部關閉
+        window.onclick = function(event) {
+            var modal = document.getElementById('addCostModal');
+            if (event.target == modal) {
+                closeAddCostModal();
+            }
+        }
+        
+        // 表單提交處理
+        document.getElementById('addCostForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 這裡可以添加表單驗證邏輯
+            var itemName = document.getElementById('item_name').value;
+            var amount = document.getElementById('amount').value;
+            
+            if (!itemName || !amount) {
+                alert('請填寫必填欄位！');
+                return;
+            }
+            
+            // 提交表單
+            this.submit();
+        });
+        
+        // 查看成本項目
+        function viewCost(costId) {
+            // 這裡可以實現查看詳情的功能
+            alert('查看成本項目 ID: ' + costId + '\n此功能後續可擴展為彈出詳情視窗');
+        }
+        
+        // 編輯成本項目
+        function editCost(costId) {
+            // 這裡可以實現編輯功能
+            alert('編輯成本項目 ID: ' + costId + '\n此功能後續可擴展為彈出編輯視窗');
+        }
+        
+        // 刪除成本項目
+        function deleteCost(costId) {
+            showDeleteModal(costId);
+        }
+        
+        // 顯示美化的刪除確認彈窗
+        function showDeleteModal(costId) {
+            // 創建彈窗背景
+            const modalOverlay = document.createElement('div');
+            modalOverlay.className = 'modal-overlay';
+            modalOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.6);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+                backdrop-filter: blur(5px);
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            // 創建彈窗內容
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: white;
+                border-radius: 16px;
+                padding: 0;
+                max-width: 400px;
+                width: 90%;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                transform: scale(0.9);
+                animation: modalSlideIn 0.3s ease forwards;
+                overflow: hidden;
+            `;
+            
+            modalContent.innerHTML = `
+                <div style="padding: 30px 30px 20px 30px; text-align: center;">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #ff6b6b, #ee5a52); border-radius: 50%; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);">
+                        <span style="font-size: 24px; color: white;">🗑️</span>
+                    </div>
+                    <h3 style="margin: 0 0 10px 0; color: #333; font-size: 1.3em; font-weight: 600;">確認刪除</h3>
+                    <p style="margin: 0; color: #666; line-height: 1.5; font-size: 0.95em;">確定要刪除這個成本項目嗎？<br><strong style="color: #e74c3c;">此操作無法復原</strong></p>
+                </div>
+                <div style="padding: 0 30px 30px 30px; display: flex; gap: 12px; justify-content: center;">
+                    <button onclick="closeDeleteModal()" style="
+                        background: #f8f9fa;
+                        color: #6c757d;
+                        border: 2px solid #e9ecef;
+                        padding: 12px 24px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 500;
+                        font-size: 0.95em;
+                        transition: all 0.3s ease;
+                        min-width: 80px;
+                    " onmouseover="this.style.background='#e9ecef'; this.style.borderColor='#dee2e6';" onmouseout="this.style.background='#f8f9fa'; this.style.borderColor='#e9ecef';">
+                        取消
+                    </button>
+                    <button onclick="confirmDelete(${costId})" style="
+                        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+                        color: white;
+                        border: none;
+                        padding: 12px 24px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 500;
+                        font-size: 0.95em;
+                        transition: all 0.3s ease;
+                        min-width: 80px;
+                        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 107, 107, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 107, 0.3)';">
+                        確定刪除
+                    </button>
+                </div>
+            `;
+            
+            modalOverlay.appendChild(modalContent);
+            document.body.appendChild(modalOverlay);
+            
+            // 點擊背景關閉彈窗
+            modalOverlay.addEventListener('click', function(e) {
+                if (e.target === modalOverlay) {
+                    closeDeleteModal();
+                }
+            });
+            
+            // 添加 CSS 動畫
+            if (!document.getElementById('modal-styles')) {
+                const style = document.createElement('style');
+                style.id = 'modal-styles';
+                style.textContent = `
+                    @keyframes fadeIn {
+                        from { opacity: 0; }
+                        to { opacity: 1; }
+                    }
+                    @keyframes modalSlideIn {
+                        from { 
+                            transform: scale(0.9);
+                            opacity: 0;
+                        }
+                        to { 
+                            transform: scale(1);
+                            opacity: 1;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+        
+        // 關閉刪除確認彈窗
+        function closeDeleteModal() {
+            const modalOverlay = document.querySelector('.modal-overlay');
+            if (modalOverlay) {
+                modalOverlay.style.animation = 'fadeIn 0.3s ease reverse';
+                setTimeout(() => {
+                    modalOverlay.remove();
+                }, 300);
+            }
+        }
+        
+        // 確認刪除
+        function confirmDelete(costId) {
+            closeDeleteModal();
+            // 實際執行刪除操作
+            window.location.href = `/dashboard/costs/${costId}/delete/`;
+        }
+        
+        // 搜索和篩選功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const tableRows = document.querySelectorAll('tbody tr');
+            
+            function filterTable() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const selectedCategory = categoryFilter.value;
+                
+                tableRows.forEach(row => {
+                    const itemName = row.querySelector('.item-name').textContent.toLowerCase();
+                    const category = row.querySelector('.category-badge').textContent;
+                    const description = row.querySelector('td:nth-child(6)').textContent.toLowerCase();
+                    
+                    const matchesSearch = itemName.includes(searchTerm) || description.includes(searchTerm);
+                    const matchesCategory = !selectedCategory || category === selectedCategory;
+                    
+                    if (matchesSearch && matchesCategory) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+            
+            searchInput.addEventListener('input', filterTable);
+            categoryFilter.addEventListener('change', filterTable);
+        });
+    </script>
+    
+    <script>
+        // 主題切換功能
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                themeIcon.textContent = '🌙';
+                themeText.textContent = '深色';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '☀️';
+                themeText.textContent = '淺色';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // 載入保存的主題
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                document.getElementById('theme-icon').textContent = '☀️';
+                document.getElementById('theme-text').textContent = '淺色';
+            }
+        }
+        
+        // 頁面載入時應用保存的主題
+        document.addEventListener('DOMContentLoaded', loadTheme);
+    </script>
+</body>
+</html>

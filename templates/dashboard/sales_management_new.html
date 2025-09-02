@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>記帳管理 - 一口口麻辣串記帳系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        .nav-logo h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: fit-content;
+        }
+        
+        .nav-menu a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .nav-menu a.active {
+            background: rgba(255, 255, 255, 0.3);
+            font-weight: 600;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .page-header {
+            background: white;
+            border-radius: 12px;
+            padding: 25px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .page-header h2 {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #2c3e50;
+            letter-spacing: 0.5px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-revenue, .btn-expense {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+            white-space: nowrap;
+        }
+        
+        .btn-revenue {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-revenue:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+        
+        .btn-expense {
+            background: linear-gradient(135deg, #dc3545, #e74c3c);
+            color: white;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+        
+        .btn-expense:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+        }
+        
+        /* 主題切換按鈕 */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            color: white;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* 深色主題樣式 */
+        [data-theme="dark"] {
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --bg-nav: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            --text-primary: #e8e8e8;
+            --text-secondary: #b8b8cc;
+            --text-muted: #8a8a9a;
+            --border-color: #2a2a3e;
+            --shadow: rgba(0, 0, 0, 0.4);
+            --accent-purple: #6366f1;
+            --accent-blue: #3b82f6;
+        }
+        
+        [data-theme="dark"] body {
+            background: var(--bg-primary) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] .container {
+            background: var(--bg-primary) !important;
+        }
+        
+        [data-theme="dark"] .main-content {
+            background: var(--bg-primary) !important;
+        }
+        
+        [data-theme="dark"] .content-wrapper {
+            background: var(--bg-primary) !important;
+        }
+        
+        [data-theme="dark"] .nav-menu {
+            background: var(--bg-nav) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        [data-theme="dark"] .nav-menu a {
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] .nav-menu a:hover {
+            background: var(--bg-card) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] .nav-menu a.active {
+            background: var(--bg-card) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] .page-header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        [data-theme="dark"] .page-header h2 {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .records-section {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        [data-theme="dark"] .section-header h3 {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .total-label {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .records-table th {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .records-table td {
+            border-bottom-color: var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .records-table tr:hover {
+            background: var(--bg-secondary);
+        }
+        
+        [data-theme="dark"] .filter-section {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        [data-theme="dark"] .filter-section h3 {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .filter-select {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .current-period {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .modal-content {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        [data-theme="dark"] .modal-header h3 {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .form-control {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .form-control:focus {
+            border-color: #667eea;
+            background: var(--bg-secondary);
+        }
+        
+        [data-theme="dark"] .form-group label {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .empty-state h4 {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .empty-state p {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .messages .message {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+        }
+        
+        [data-theme="dark"] .message-success {
+            background: rgba(40, 167, 69, 0.1);
+            border-color: #28a745;
+        }
+        
+        [data-theme="dark"] .message-error {
+            background: rgba(220, 53, 69, 0.1);
+            border-color: #dc3545;
+        }
+        
+        [data-theme="dark"] .content-cell {
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] .category-cell {
+            color: var(--text-secondary) !important;
+        }
+        
+        [data-theme="dark"] .location-cell {
+            color: var(--text-secondary) !important;
+        }
+        
+        [data-theme="dark"] .date-cell {
+            color: var(--text-secondary) !important;
+        }
+        
+        [data-theme="dark"] .notes-cell {
+            color: var(--text-secondary) !important;
+        }
+        
+        [data-theme="dark"] .amount-cell {
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] .income-amount {
+            color: #28a745 !important;
+        }
+        
+        [data-theme="dark"] .expense-amount {
+            color: #dc3545 !important;
+        }
+        
+        [data-theme="dark"] .total-amount {
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] .income-total {
+            color: #28a745 !important;
+        }
+        
+        [data-theme="dark"] .expense-total {
+            color: #dc3545 !important;
+        }
+        
+        [data-theme="dark"] .section-total {
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] .empty-state {
+            color: var(--text-secondary) !important;
+        }
+        
+        [data-theme="dark"] .empty-state h4 {
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] .empty-state p {
+            color: var(--text-secondary) !important;
+        }
+        
+        [data-theme="dark"] .close {
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] .close:hover {
+            color: var(--text-secondary) !important;
+        }
+        
+        /* 確保所有可能的背景元素都使用深色主題 */
+        [data-theme="dark"] * {
+            background-color: inherit !important;
+        }
+        
+        /* 強制所有白色背景變為深色 */
+        [data-theme="dark"] div:not(.records-section):not(.filter-section):not(.modal-content):not(.page-header) {
+            background: var(--bg-primary) !important;
+        }
+        
+        /* 修復字體顯示問題 */
+        [data-theme="dark"] * {
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] h1, h2, h3, h4, h5, h6 {
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] p, span, div, td, th {
+            color: var(--text-primary) !important;
+        }
+        
+        /* 修復圖片和圖標顯示 */
+        [data-theme="dark"] img {
+            filter: brightness(1.2) contrast(1.1) !important;
+        }
+        
+        [data-theme="dark"] .btn {
+            color: white !important;
+        }
+        
+        [data-theme="dark"] .btn:hover {
+            color: white !important;
+        }
+        
+        [data-theme="dark"] html {
+            background: var(--bg-primary) !important;
+        }
+        
+        [data-theme="dark"] .records-container {
+            background: var(--bg-primary) !important;
+        }
+        
+        [data-theme="dark"] .income-section {
+            background: var(--bg-primary) !important;
+        }
+        
+        [data-theme="dark"] .expense-section {
+            background: var(--bg-primary) !important;
+        }
+        
+        [data-theme="dark"] .nav-container {
+            background: var(--bg-nav) !important;
+        }
+        
+        [data-theme="dark"] .filter-container {
+            background: transparent !important;
+        }
+        
+        [data-theme="dark"] .navbar {
+            background: var(--bg-nav) !important;
+        }
+        
+        /* 強制覆蓋所有可能的白色背景 */
+        [data-theme="dark"] {
+            background: var(--bg-primary) !important;
+        }
+        
+        [data-theme="dark"] body, [data-theme="dark"] html {
+            background: var(--bg-primary) !important;
+        }
+        
+        [data-theme="dark"] .container, [data-theme="dark"] .main-content, [data-theme="dark"] .content-wrapper {
+            background: var(--bg-primary) !important;
+        }
+        
+        /* 確保所有div元素都有深色背景 */
+        [data-theme="dark"] div {
+            background: var(--bg-primary) !important;
+        }
+        
+        /* 特殊處理有漸層的元素 */
+        [data-theme="dark"] .records-section {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary)) !important;
+        }
+        
+        [data-theme="dark"] .filter-section {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary)) !important;
+        }
+        
+        [data-theme="dark"] .page-header {
+            background: var(--bg-nav) !important;
+        }
+        
+        [data-theme="dark"] .modal-content {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary)) !important;
+        }
+        
+        /* 終極背景覆蓋規則 - 確保沒有任何白色背景 */
+        [data-theme="dark"] *:not(.records-section):not(.filter-section):not(.modal-content):not(.page-header):not(.nav-menu) {
+            background: var(--bg-primary) !important;
+        }
+        
+        /* 確保所有文字都是淺色 */
+        [data-theme="dark"] * {
+            color: var(--text-primary) !important;
+        }
+        
+        /* 特殊處理按鈕文字 */
+        [data-theme="dark"] .btn, [data-theme="dark"] button {
+            color: white !important;
+            background: var(--accent-purple) !important;
+        }
+        
+        [data-theme="dark"] .btn:hover, [data-theme="dark"] button:hover {
+            color: white !important;
+            background: var(--accent-blue) !important;
+        }
+        
+        /* 增強區塊邊界和分隔效果 */
+        [data-theme="dark"] .records-section {
+            border: 2px solid var(--border-color) !important;
+            border-radius: 15px !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent-purple) !important;
+            margin: 15px !important;
+        }
+        
+        [data-theme="dark"] .filter-section {
+            border: 2px solid var(--border-color) !important;
+            border-radius: 15px !important;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent-blue) !important;
+            margin: 15px !important;
+        }
+        
+        [data-theme="dark"] .page-header {
+            border: 2px solid var(--border-color) !important;
+            border-radius: 15px !important;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent-purple) !important;
+            margin: 15px !important;
+        }
+        
+        [data-theme="dark"] .modal-content {
+            border: 3px solid var(--accent-purple) !important;
+            border-radius: 20px !important;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 0 2px var(--accent-blue) !important;
+        }
+        
+        [data-theme="dark"] .nav-menu {
+            border-bottom: 3px solid var(--accent-purple) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        [data-theme="dark"] .records-table {
+            border: 2px solid var(--border-color) !important;
+            border-radius: 12px !important;
+            overflow: hidden !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        [data-theme="dark"] .records-table th {
+            border-bottom: 2px solid var(--accent-purple) !important;
+            background: var(--bg-card) !important;
+        }
+        
+        [data-theme="dark"] .records-table td {
+            border-bottom: 1px solid var(--border-color) !important;
+        }
+        
+        [data-theme="dark"] .records-table tr:hover {
+            background: var(--bg-secondary) !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        [data-theme="dark"] .action-buttons {
+            border: 2px solid var(--border-color) !important;
+            border-radius: 12px !important;
+            padding: 15px !important;
+            background: var(--bg-card) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+            margin: 15px !important;
+        }
+        
+        [data-theme="dark"] .section-header {
+            border-bottom: 2px solid var(--accent-blue) !important;
+            padding-bottom: 10px !important;
+            margin-bottom: 15px !important;
+        }
+        
+        [data-theme="dark"] .total-amount {
+            border: 2px solid var(--accent-purple) !important;
+            border-radius: 10px !important;
+            background: var(--bg-card) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+            padding: 10px !important;
+        }
+        
+        /* 為系統標題添加底線效果 */
+        [data-theme="dark"] .nav-logo h1 {
+            border-bottom: 2px solid var(--accent-purple) !important;
+            padding-bottom: 8px !important;
+            margin-bottom: 0 !important;
+            display: inline-block !important;
+        }
+        
+        [data-theme="dark"] .nav-logo {
+            border-bottom: 2px solid var(--accent-purple) !important;
+            padding-bottom: 8px !important;
+        }
+
+        /* 篩選區域樣式 */
+        .filter-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .filter-container h3 {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .filter-form {
+            margin-bottom: 15px;
+        }
+        
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .filter-select {
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 0.95em;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .filter-btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1em;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .filter-info {
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .current-period {
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        /* 左右分區布局 */
+        .records-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .records-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+        
+        .section-header h3 {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .section-total {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .total-label {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .total-amount {
+            font-size: 1.2em;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 6px;
+        }
+        
+        .income-total {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+        }
+        
+        .expense-total {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+        }
+        
+        .records-table {
+            overflow-x: auto;
+        }
+        
+        .records-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .records-table th {
+            background: #f8f9fa;
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+            font-size: 1em;
+        }
+        
+        .records-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #f1f3f4;
+            vertical-align: middle;
+            font-size: 1em;
+        }
+        
+        .records-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .amount-cell {
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+        
+        .income-amount {
+            color: #28a745;
+        }
+        
+        .location-cell {
+            color: #495057;
+            font-weight: 500;
+            font-size: 1em;
+        }
+        
+        .location-cell:empty::after {
+            content: "-";
+            color: #dee2e6;
+            font-style: italic;
+        }
+        
+        .date-cell {
+            color: #6c757d;
+            font-size: 1em;
+        }
+        
+        .notes-cell {
+            color: #6c757d;
+            font-size: 1em;
+            max-width: 150px;
+            word-wrap: break-word;
+        }
+        
+        .notes-cell:empty::after {
+            content: "-";
+            color: #dee2e6;
+            font-style: italic;
+        }
+        
+        .content-cell {
+            color: #495057;
+            font-weight: 500;
+            font-size: 1em;
+        }
+        
+        .category-cell {
+            color: #6c757d;
+            font-size: 1em;
+        }
+        
+        .category-cell:empty::after {
+            content: "-";
+            color: #dee2e6;
+            font-style: italic;
+        }
+        
+        .action-cell {
+            display: flex;
+            gap: 4px;
+            flex-wrap: nowrap;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 6px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            text-align: center;
+            line-height: 20px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+            color: #212529;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-danger::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-danger:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.6;
+        }
+        
+        .empty-state h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+        
+        .empty-state p {
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .records-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-select, .filter-btn {
+                width: 100%;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .btn-revenue, .btn-expense {
+                width: 100%;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+        
+        /* 彈窗樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+        
+        .close {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .close:hover {
+            transform: scale(1.1);
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-control[type="textarea"], textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .btn-submit {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cancel:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Messages 樣式 */
+        .messages {
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .message-success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        
+        .message-error {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .message-warning {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .message-info {
+            background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h1>一口口麻辣串記帳系統</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="{% url 'dashboard' %}">🏠 首頁</a>
+                <a href="{% url 'sales_management' %}" class="active">📊 記帳管理</a>
+                <a href="{% url 'cost_management' %}">💰 成本管理</a>
+                <a href="{% url 'profit_analysis' %}">📈 利潤分析</a>
+                <a href="{% url 'user_management' %}">👥 用戶管理</a>
+                <a href="{% url 'custom_logout' %}">🚪 登出</a>
+            </div>
+        </div>
+    </nav>
+    
+        <!-- 主題切換按鈕 -->
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <span id="theme-icon">🌙</span>
+        <span id="theme-text">深色</span>
+    </button>
+
+    <div class="container">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message message-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="page-header">
+            <h2>💰 記帳管理</h2>
+            <div class="action-buttons">
+                <button class="btn-revenue" onclick="openRevenueModal()">💰 營業額登記</button>
+                <button class="btn-expense" onclick="openExpenseModal()">💸 支出</button>
+            </div>
+        </div>
+        
+        <!-- 篩選區域 -->
+        <div class="filter-section">
+            <div class="filter-container">
+                <h3>📅 月份篩選</h3>
+                <form method="GET" class="filter-form">
+                    <div class="filter-controls">
+                        <select name="year" class="filter-select">
+                            {% for year in years %}
+                                <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}年</option>
+                            {% endfor %}
+                        </select>
+                        <select name="month" class="filter-select">
+                            {% for month_num, month_name in months %}
+                                <option value="{{ month_num }}" {% if month_num == selected_month %}selected{% endif %}>{{ month_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-primary filter-btn">
+                            🔍 篩選
+                        </button>
+                        <a href="{% url 'sales_management' %}" class="btn btn-secondary filter-btn">
+                            🔄 重置
+                        </a>
+            </div>
+                </form>
+                <div class="filter-info">
+                    <span class="current-period">目前顯示：{{ selected_year }}年{{ current_month_name }}</span>
+            </div>
+            </div>
+        </div>
+        
+        <!-- 左右分區布局 -->
+        <div class="records-container">
+            <!-- 左側：收入記錄 -->
+            <div class="records-section income-section">
+                <div class="section-header">
+                    <h3>💰 收入記錄</h3>
+                    <div class="section-total">
+                        <span class="total-label">本月總計：</span>
+                        <span class="total-amount income-total">${{ sales_total|floatformat:2 }}</span>
+                    </div>
+            </div>
+            
+                {% if filtered_sales %}
+                <div class="records-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>成本</th>
+                                <th>地點</th>
+                            <th>日期</th>
+                                <th>備註</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                            {% for sale in filtered_sales %}
+                            <tr>
+                                <td class="amount-cell income-amount">${{ sale.amount|floatformat:2 }}</td>
+                                <td class="location-cell">{% if sale.category %}{{ sale.category }}{% endif %}</td>
+                                <td class="date-cell">{{ sale.date|date:"m-d H:i" }}</td>
+                                <td class="notes-cell">{% if sale.notes %}{{ sale.notes }}{% endif %}</td>
+                                <td class="action-cell">
+                                    <a href="#" class="btn btn-warning" title="編輯">✏️</a>
+                                    <a href="#" class="btn btn-danger" onclick="deleteSale({{ sale.id }})" title="刪除">🗑️</a>
+                            </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">💰</div>
+                    <h4>本月尚無收入記錄</h4>
+                    <p>點擊上方按鈕開始記錄營業額</p>
+                </div>
+                                {% endif %}
+            </div>
+            
+            <!-- 右側：支出記錄 -->
+            <div class="records-section expense-section">
+                <div class="section-header">
+                    <h3>💸 支出記錄</h3>
+                    <div class="section-total">
+                        <span class="total-label">本月總計：</span>
+                        <span class="total-amount expense-total">${{ expenses_total|floatformat:2 }}</span>
+                    </div>
+                </div>
+                
+                {% if filtered_expenses %}
+                <div class="records-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>成本</th>
+                                <th>內容</th>
+                                <th>類別</th>
+                                <th>日期</th>
+                                <th>備註</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for expense in filtered_expenses %}
+                            <tr>
+                                <td class="amount-cell expense-amount">${{ expense.amount|floatformat:2 }}</td>
+                                <td class="content-cell">{{ expense.item_name }}</td>
+                                <td class="category-cell">{% if expense.category %}{{ expense.category }}{% endif %}</td>
+                                <td class="date-cell">{{ expense.date|date:"m-d H:i" }}</td>
+                                <td class="notes-cell">{% if expense.notes %}{{ expense.notes }}{% endif %}</td>
+                                <td class="action-cell">
+                                    <a href="#" class="btn btn-warning" title="編輯">✏️</a>
+                                    <a href="#" class="btn btn-danger" onclick="deleteExpense({{ expense.id }})" title="刪除">🗑️</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                    <div class="empty-icon">💸</div>
+                    <h4>本月尚無支出記錄</h4>
+                    <p>點擊上方按鈕開始記錄支出</p>
+            </div>
+            {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- 營業額登記彈窗 -->
+    <div id="revenueModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💰 營業額登記</h3>
+                <span class="close" onclick="closeRevenueModal()">&times;</span>
+            </div>
+            <form id="revenueForm" method="POST" action="{% url 'add_revenue' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                <div class="form-group">
+                    <label for="amount">金額 *</label>
+                        <input type="number" id="amount" name="amount" class="form-control" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                        <label for="category">地點</label>
+                        <input type="text" id="category" name="category" class="form-control" placeholder="例如：堂食、外帶、外送等">
+                </div>
+                    <div class="form-group">
+                        <label for="notes">備註</label>
+                        <textarea id="notes" name="notes" class="form-control" rows="3" placeholder="可選填寫額外說明..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeRevenueModal()">取消</button>
+                    <button type="submit" class="btn-submit">確認登記</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 支出登記彈窗 -->
+    <div id="expenseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💸 支出登記</h3>
+                <span class="close" onclick="closeExpenseModal()">&times;</span>
+            </div>
+            <form id="expenseForm" method="POST" action="{% url 'add_expense' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                <div class="form-group">
+                        <label for="expense_item">項目名稱 *</label>
+                        <input type="text" id="expense_item" name="expense_item" class="form-control" required>
+                </div>
+                    <div class="form-group">
+                    <label for="expense_amount">金額 *</label>
+                        <input type="number" id="expense_amount" name="expense_amount" class="form-control" step="0.01" min="0" required>
+                </div>
+                    <div class="form-group">
+                        <label for="expense_category">類別</label>
+                        <input type="text" id="expense_category" name="expense_category" class="form-control" placeholder="例如：日常支出、食材採購、設備維護等">
+                    </div>
+                <div class="form-group">
+                    <label for="expense_notes">備註</label>
+                        <textarea id="expense_notes" name="expense_notes" class="form-control" rows="3" placeholder="可選填寫額外說明..."></textarea>
+                </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeExpenseModal()">取消</button>
+                    <button type="submit" class="btn-submit">確認登記</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // 主題切換功能
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.setAttribute('data-theme', 'light');
+                themeIcon.textContent = '🌙';
+                themeText.textContent = '深色';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '☀️';
+                themeText.textContent = '淺色';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // 載入時檢查保存的主題
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            
+            if (savedTheme === 'dark') {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '☀️';
+                themeText.textContent = '淺色';
+            } else {
+                body.setAttribute('data-theme', 'light');
+                themeIcon.textContent = '🌙';
+                themeText.textContent = '深色';
+            }
+        }
+        
+        // 頁面載入時執行
+        document.addEventListener('DOMContentLoaded', loadTheme);
+
+        // 營業額登記彈出視窗
+        function openRevenueModal() {
+            document.getElementById('revenueModal').style.display = 'block';
+        }
+        
+        function closeRevenueModal() {
+            document.getElementById('revenueModal').style.display = 'none';
+            document.getElementById('revenueForm').reset();
+        }
+        
+        // 支出彈出視窗
+        function openExpenseModal() {
+            document.getElementById('expenseModal').style.display = 'block';
+        }
+        
+        function closeExpenseModal() {
+            document.getElementById('expenseModal').style.display = 'none';
+            document.getElementById('expenseForm').reset();
+        }
+        
+        // 點擊彈出視窗外部關閉
+        window.onclick = function(event) {
+            var revenueModal = document.getElementById('revenueModal');
+            var expenseModal = document.getElementById('expenseModal');
+            
+            if (event.target == revenueModal) {
+                closeRevenueModal();
+            }
+            if (event.target == expenseModal) {
+                closeExpenseModal();
+            }
+        }
+        
+        // 刪除銷售記錄
+        function deleteSale(saleId) {
+            showDeleteModal(saleId, 'sale');
+        }
+        
+        // 刪除支出記錄
+        function deleteExpense(expenseId) {
+            showDeleteModal(expenseId, 'expense');
+        }
+        
+        // 顯示美化的刪除確認彈窗
+        function showDeleteModal(recordId, recordType) {
+            const recordTypeText = recordType === 'sale' ? '銷售記錄' : '支出記錄';
+            
+            // 創建彈窗背景
+            const modalOverlay = document.createElement('div');
+            modalOverlay.className = 'modal-overlay';
+            modalOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.6);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+                backdrop-filter: blur(5px);
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            // 創建彈窗內容
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: white;
+                border-radius: 16px;
+                padding: 0;
+                max-width: 400px;
+                width: 90%;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                transform: scale(0.9);
+                animation: modalSlideIn 0.3s ease forwards;
+                overflow: hidden;
+            `;
+            
+            modalContent.innerHTML = `
+                <div style="padding: 30px 30px 20px 30px; text-align: center;">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #ff6b6b, #ee5a52); border-radius: 50%; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);">
+                        <span style="font-size: 24px; color: white;">🗑️</span>
+                    </div>
+                    <h3 style="margin: 0 0 10px 0; color: #333; font-size: 1.3em; font-weight: 600;">確認刪除</h3>
+                    <p style="margin: 0; color: #666; line-height: 1.5; font-size: 0.95em;">確定要刪除這個${recordTypeText}嗎？<br><strong style="color: #e74c3c;">此操作無法復原</strong></p>
+                </div>
+                <div style="padding: 0 30px 30px 30px; display: flex; gap: 12px; justify-content: center;">
+                    <button onclick="closeDeleteModal()" style="
+                        background: #f8f9fa;
+                        color: #6c757d;
+                        border: 2px solid #e9ecef;
+                        padding: 12px 24px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 500;
+                        font-size: 0.95em;
+                        transition: all 0.3s ease;
+                        min-width: 80px;
+                    " onmouseover="this.style.background='#e9ecef'; this.style.borderColor='#dee2e6';" onmouseout="this.style.background='#f8f9fa'; this.style.borderColor='#e9ecef';">
+                        取消
+                    </button>
+                    <button onclick="confirmDelete(${recordId}, '${recordType}')" style="
+                        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+                        color: white;
+                        border: none;
+                        padding: 12px 24px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 500;
+                        font-size: 0.95em;
+                        transition: all 0.3s ease;
+                        min-width: 80px;
+                        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 107, 107, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 107, 0.3)';">
+                        確定刪除
+                    </button>
+                </div>
+            `;
+            
+            modalOverlay.appendChild(modalContent);
+            document.body.appendChild(modalOverlay);
+            
+            // 點擊背景關閉彈窗
+            modalOverlay.addEventListener('click', function(e) {
+                if (e.target === modalOverlay) {
+                    closeDeleteModal();
+                }
+            });
+            
+            // 添加 CSS 動畫
+            if (!document.getElementById('modal-styles')) {
+                const style = document.createElement('style');
+                style.id = 'modal-styles';
+                style.textContent = `
+                    @keyframes fadeIn {
+                        from { opacity: 0; }
+                        to { opacity: 1; }
+                    }
+                    @keyframes modalSlideIn {
+                        from { 
+                            transform: scale(0.9);
+                            opacity: 0;
+                        }
+                        to { 
+                            transform: scale(1);
+                            opacity: 1;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+        
+        // 關閉刪除確認彈窗
+        function closeDeleteModal() {
+            const modalOverlay = document.querySelector('.modal-overlay');
+            if (modalOverlay) {
+                modalOverlay.style.animation = 'fadeIn 0.3s ease reverse';
+                setTimeout(() => {
+                    modalOverlay.remove();
+                }, 300);
+            }
+        }
+        
+        // 確認刪除
+        function confirmDelete(recordId, recordType) {
+            closeDeleteModal();
+            // 根據記錄類型執行相應的刪除操作
+            if (recordType === 'sale') {
+                window.location.href = `/dashboard/sales/sale/${recordId}/delete/`;
+            } else if (recordType === 'expense') {
+                window.location.href = `/dashboard/sales/expense/${recordId}/delete/`;
+            }
+        }
+        
+        // 表單提交處理
+        document.getElementById('revenueForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const amount = document.getElementById('amount').value;
+            if (!amount || parseFloat(amount) <= 0) {
+                alert('請輸入有效的金額');
+                return;
+            }
+            
+            this.submit();
+        });
+        
+        document.getElementById('expenseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const itemName = document.getElementById('expense_item').value.trim();
+            const amount = document.getElementById('expense_amount').value;
+            
+            if (!itemName) {
+                alert('請輸入項目名稱');
+                return;
+            }
+            
+            if (!amount || parseFloat(amount) <= 0) {
+                alert('請輸入有效的金額');
+                return;
+            }
+            
+            this.submit();
+        });
+    </script>
+</body>
+</html>

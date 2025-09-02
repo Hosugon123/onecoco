@@ -1,0 +1,712 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load cost_filters %}
+
+{% block title %}成本管理 - 一口口麻辣串記帳系統{% endblock %}
+
+{% block page_css %}
+/* 成本管理頁面特定樣式 */
+.page-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.page-header h2 {
+    font-size: 1.8em;
+    font-weight: 600;
+    margin: 0;
+}
+
+.add-cost-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.add-cost-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+    color: white;
+}
+
+.costs-table {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.table-header h3 {
+    color: #495057;
+    font-size: 1.3em;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.table-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.search-input {
+    padding: 8px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 0.9em;
+    min-width: 200px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.filter-btn {
+    padding: 8px 15px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.costs-list {
+    margin-top: 20px;
+}
+
+/* 分類標題行樣式 */
+.costs-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    gap: 15px;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 10px 10px 0 0;
+    font-weight: 600;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+.header-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 成本記錄項目樣式 */
+.cost-item {
+    background: #f8f9fa;
+    border-radius: 0;
+    padding: 12px 20px;
+    border: 1px solid #e9ecef;
+    border-top: none;
+    transition: all 0.3s ease;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    gap: 15px;
+    align-items: center;
+}
+
+.cost-item:last-child {
+    border-radius: 0 0 10px 10px;
+}
+
+.cost-item:hover {
+    background: #e9ecef;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cost-data {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+.cost-name {
+    font-weight: 600;
+    color: #495057;
+    text-align: left;
+    width: 100%;
+}
+
+.cost-unit {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.cost-amount {
+    font-weight: 600;
+    color: #dc3545;
+}
+
+.selling-price {
+    font-weight: 500;
+    color: #28a745;
+}
+
+.no-price {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.cost-category {
+    color: #495057;
+    font-weight: 500;
+}
+
+.cost-date {
+    color: #6c757d;
+    font-size: 0.85em;
+}
+
+.cost-actions {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+}
+
+.action-btn {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+}
+
+.edit-btn {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: 1px solid #007bff;
+}
+
+.delete-btn {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+    color: white;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+}
+
+.empty-state h4 {
+    color: #495057;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.empty-state p {
+    color: #6c757d;
+    font-size: 1em;
+}
+
+/* 模態框樣式 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: white;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px 25px;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.3em;
+    font-weight: 600;
+}
+
+.close {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close:hover {
+    color: #f0f0f0;
+    transform: scale(1.1);
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #495057;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    background: white;
+    color: #495057;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* 隱藏number輸入框的調節按鈕 */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.modal-footer {
+    padding: 20px 25px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* 深色主題特定樣式 */
+[data-theme="dark"] .page-header {
+    background: var(--bg-nav) !important;
+    border: 2px solid var(--border-color) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent-purple) !important;
+}
+
+[data-theme="dark"] .costs-table {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary)) !important;
+    border: 2px solid var(--border-color) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent-blue) !important;
+}
+
+[data-theme="dark"] .table-header {
+    border-bottom: 2px solid var(--accent-blue) !important;
+}
+
+[data-theme="dark"] .costs-header {
+    background: var(--bg-nav) !important;
+    border: 2px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .cost-item {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .cost-item:hover {
+    background: var(--bg-card) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] .cost-name {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .cost-amount {
+    color: #ff6b6b !important;
+}
+
+[data-theme="dark"] .selling-price {
+    color: #51cf66 !important;
+}
+
+[data-theme="dark"] .cost-category {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .cost-date {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .modal-content {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary)) !important;
+    border: 3px solid var(--accent-purple) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 0 2px var(--accent-blue) !important;
+}
+
+[data-theme="dark"] .modal-header {
+    background: var(--bg-nav) !important;
+}
+
+[data-theme="dark"] .close {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .close:hover {
+    color: var(--text-secondary) !important;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .table-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+    
+    .table-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .search-input {
+        min-width: auto;
+    }
+    
+    .costs-header {
+        grid-template-columns: 1fr;
+        gap: 5px;
+        padding: 10px;
+        font-size: 0.8em;
+    }
+    
+    .cost-item {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+    
+    .cost-data {
+        justify-content: space-between;
+        padding: 5px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .cost-data:last-child {
+        border-bottom: none;
+    }
+    
+    .cost-data::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #6c757d;
+        font-size: 0.8em;
+    }
+    
+    .cost-actions {
+        justify-content: center;
+        margin-left: 0;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .cost-details {
+        font-size: 0.8em;
+    }
+    
+    .cost-title {
+        font-size: 0.9em;
+        min-width: auto;
+    }
+    
+    .cost-amount {
+        font-size: 1em;
+    }
+}
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <h2>📝 成本管理</h2>
+    <button class="add-cost-btn" onclick="ModalUtils.showModal('addCostModal')">
+        ➕ 新增成本
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="costs-table">
+    <div class="table-header">
+        <h3>📊 成本記錄</h3>
+        <div class="table-controls">
+            <input type="text" class="search-input" placeholder="搜尋成本項目..." id="costSearch">
+            <button class="filter-btn" onclick="filterCosts()">🔍 篩選</button>
+        </div>
+    </div>
+    
+    <!-- 分類標題行 -->
+    <div class="costs-header">
+        <div class="header-item name-col">名稱</div>
+        <div class="header-item unit-col">單位</div>
+        <div class="header-item amount-col">成本</div>
+        <div class="header-item price-col">售價</div>
+        <div class="header-item category-col">類別</div>
+        <div class="header-item date-col">日期</div>
+        <div class="header-item actions-col">操作</div>
+    </div>
+    
+    <div class="costs-list" id="costsList">
+        {% if costs %}
+            {% for cost in costs %}
+            <div class="cost-item" data-cost-id="{{ cost.id }}">
+                <div class="cost-data name-col" data-label="名稱:">
+                    <span class="cost-name">{{ cost.description|get_name }}</span>
+                </div>
+                <div class="cost-data unit-col" data-label="單位:">
+                    <span class="cost-unit">{{ cost.description|get_unit }}</span>
+                </div>
+                <div class="cost-data amount-col" data-label="成本:">
+                    <span class="cost-amount">${{ cost.amount|floatformat:2 }}</span>
+                </div>
+                <div class="cost-data price-col" data-label="售價:">
+                    {% if cost.selling_price and cost.selling_price > 0 %}
+                    <span class="selling-price">${{ cost.selling_price|floatformat:2 }}</span>
+                    {% else %}
+                    <span class="no-price">-</span>
+                    {% endif %}
+                </div>
+                <div class="cost-data category-col" data-label="類別:">
+                    <span class="cost-category">{{ cost.category|default:"未分類" }}</span>
+                </div>
+                <div class="cost-data date-col" data-label="日期:">
+                    <span class="cost-date">{{ cost.date|date:"m/d H:i" }}</span>
+                </div>
+                <div class="cost-data actions-col" data-label="操作:">
+                    <div class="cost-actions">
+                        <button class="action-btn edit-btn" onclick="editCost({{ cost.id }})" title="編輯">
+                            ✏️
+                        </button>
+                        <button class="action-btn delete-btn" onclick="deleteCost({{ cost.id }})" title="刪除">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <h4>📋 暫無成本記錄</h4>
+                <p>點擊「新增成本」開始記錄成本項目</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 新增成本模態框 -->
+<div id="addCostModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>➕ 新增成本</h3>
+            <span class="close" onclick="ModalUtils.hideModal('addCostModal')">&times;</span>
+        </div>
+        <form method="POST" action="{% url 'add_cost' %}" id="addCostForm">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="item_name">項目名稱 *</label>
+                    <input type="text" id="item_name" name="item_name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="unit">單位</label>
+                    <input type="text" id="unit" name="unit" class="form-control" placeholder="例如：公斤、包、個等">
+                </div>
+                <div class="form-group">
+                    <label for="amount">成本 *</label>
+                    <input type="number" id="amount" name="amount" class="form-control" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="selling_price">售價</label>
+                    <input type="number" id="selling_price" name="selling_price" class="form-control" step="0.01" min="0" placeholder="可選填寫，用於計算利潤" style="-moz-appearance: textfield;">
+                </div>
+                <div class="form-group">
+                    <label for="category">類別</label>
+                    <input type="text" id="category" name="category" class="form-control" placeholder="例如：食材、設備、租金等">
+                </div>
+                <div class="form-group">
+                    <label for="notes">備註</label>
+                    <textarea id="notes" name="notes" class="form-control" rows="3" placeholder="可選填寫額外說明..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="ModalUtils.hideModal('addCostModal')">取消</button>
+                <button type="submit" class="btn btn-success">確認新增</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+// 成本管理頁面特定JavaScript
+
+// 篩選成本項目
+function filterCosts() {
+    const searchInput = document.getElementById('costSearch');
+    const costItems = document.querySelectorAll('.cost-item');
+    const filter = searchInput.value.toLowerCase();
+    
+    costItems.forEach(item => {
+        const title = item.querySelector('.cost-title').textContent.toLowerCase();
+        const category = item.querySelector('.cost-detail-value').textContent.toLowerCase();
+        
+        if (title.includes(filter) || category.includes(filter)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+// 編輯成本
+function editCost(costId) {
+    Utils.showMessage('編輯功能開發中...', 'info');
+}
+
+// 刪除成本
+function deleteCost(costId) {
+    Utils.confirm('確定要刪除這筆成本記錄嗎？', function() {
+        window.location.href = `/dashboard/costs/${costId}/delete/`;
+    });
+}
+
+// 表單驗證
+document.getElementById('addCostForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const itemName = document.getElementById('item_name').value.trim();
+    const unit = document.getElementById('unit').value.trim();
+    const amount = document.getElementById('amount').value;
+    const sellingPrice = document.getElementById('selling_price').value;
+    
+    if (!itemName) {
+        Utils.showMessage('請輸入項目名稱', 'error');
+        return;
+    }
+    
+    if (!amount || parseFloat(amount) <= 0) {
+        Utils.showMessage('請輸入有效的成本', 'error');
+        return;
+    }
+    
+    if (sellingPrice && parseFloat(sellingPrice) <= 0) {
+        Utils.showMessage('請輸入有效的售價', 'error');
+        return;
+    }
+    
+    this.submit();
+});
+
+// 搜尋功能
+document.getElementById('costSearch').addEventListener('input', function() {
+    filterCosts();
+});
+{% endblock %}

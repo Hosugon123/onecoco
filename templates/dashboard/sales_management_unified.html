@@ -1,0 +1,971 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}記帳管理 - 一口口麻辣串記帳系統{% endblock %}
+
+{% block page_css %}
+/* 記帳管理頁面特定樣式 */
+.page-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.page-header h2 {
+    font-size: 1.8em;
+    font-weight: 600;
+    margin: 0;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-revenue {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-revenue:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+    color: white;
+}
+
+.btn-expense {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-expense:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
+    color: white;
+}
+
+/* 篩選區域樣式 */
+.filter-section {
+    background: white;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+.filter-container h3 {
+    color: #495057;
+    margin-bottom: 12px;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-select {
+    padding: 8px 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 0.9em;
+    background: white;
+    color: #495057;
+    min-width: 100px;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-width: 60px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.filter-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.current-period {
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    color: #6c757d;
+    font-size: 0.85em;
+}
+
+/* 記錄容器 */
+.records-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-top: 25px;
+}
+
+.records-section {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.section-header h3 {
+    color: #495057;
+    font-size: 1.3em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.section-total {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+.expense-section .section-total {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+}
+
+/* 表格樣式 */
+.records-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.records-table th {
+    background: #f8f9fa;
+    padding: 12px 10px;
+    text-align: left;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+    font-size: 1em;
+}
+
+.records-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #dee2e6;
+    color: #495057;
+    font-size: 1em;
+}
+
+.records-table tr:hover {
+    background: #f8f9fa;
+}
+
+.amount-cell {
+    font-weight: 600;
+    font-size: 1.2em;
+    color: #28a745;
+}
+
+.expense-amount {
+    color: #dc3545;
+}
+
+.content-cell {
+    color: #495057;
+    font-weight: 500;
+    font-size: 1em;
+}
+
+.category-cell {
+    color: #6c757d;
+    font-size: 1em;
+}
+
+.category-cell:empty::after {
+    content: "-";
+    color: #dee2e6;
+    font-style: italic;
+}
+
+.location-cell {
+    color: #495057;
+    font-size: 1em;
+}
+
+.date-cell {
+    color: #6c757d;
+    font-size: 1em;
+}
+
+.notes-cell {
+    color: #495057;
+    font-size: 1em;
+}
+
+.action-cell {
+    display: flex;
+    gap: 4px;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn {
+    padding: 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    width: 32px;
+    height: 32px;
+    text-align: center;
+    line-height: 20px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+    color: white;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+    color: white;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* 空狀態 */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+}
+
+.empty-state h4 {
+    color: #495057;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.empty-state p {
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+/* 模態框樣式 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: white;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 520px;
+    min-width: 400px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px 25px;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.3em;
+    font-weight: 600;
+}
+
+.close {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close:hover {
+    color: #f0f0f0;
+    transform: scale(1.1);
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #495057;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    background: white;
+    color: #495057;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.modal-footer {
+    padding: 20px 25px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-footer .btn {
+    padding: 12px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.6em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    min-width: 50px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-footer .btn-secondary {
+    background: linear-gradient(135deg, #dc3545, #e74c3c) !important;
+    color: white !important;
+}
+
+.modal-footer .btn-success {
+    background: linear-gradient(135deg, #28a745, #20c997) !important;
+    color: white !important;
+    font-size: 1.2em !important;
+}
+
+.modal-footer .btn-danger {
+    background: linear-gradient(135deg, #28a745, #20c997) !important;
+    color: white !important;
+    font-size: 1.2em !important;
+}
+
+.modal-footer .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* 深色主題特定樣式 */
+[data-theme="dark"] .page-header {
+    background: var(--bg-nav) !important;
+    border: 2px solid var(--border-color) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent-purple) !important;
+}
+
+[data-theme="dark"] .filter-section {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary)) !important;
+    border: 2px solid var(--border-color) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent-blue) !important;
+}
+
+[data-theme="dark"] .records-section {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary)) !important;
+    border: 2px solid var(--border-color) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent-purple) !important;
+}
+
+[data-theme="dark"] .section-header {
+    border-bottom: 2px solid var(--accent-blue) !important;
+}
+
+[data-theme="dark"] .modal-content {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary)) !important;
+    border: 3px solid var(--accent-purple) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 0 2px var(--accent-blue) !important;
+}
+
+[data-theme="dark"] .modal-header {
+    background: var(--bg-nav) !important;
+}
+
+[data-theme="dark"] .close {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .close:hover {
+    color: var(--text-secondary) !important;
+}
+
+/* 深色主題下的模態框按鈕樣式 */
+[data-theme="dark"] .modal-footer .btn-secondary {
+    background: linear-gradient(135deg, #dc3545, #e74c3c) !important;
+    color: white !important;
+}
+
+[data-theme="dark"] .modal-footer .btn-success {
+    background: linear-gradient(135deg, #28a745, #20c997) !important;
+    color: white !important;
+    font-size: 1.2em !important;
+}
+
+[data-theme="dark"] .modal-footer .btn-danger {
+    background: linear-gradient(135deg, #28a745, #20c997) !important;
+    color: white !important;
+    font-size: 1.2em !important;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .records-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .filter-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-select {
+        min-width: auto;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+        min-width: 320px;
+        max-width: 95%;
+    }
+    
+    .modal-footer {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+        padding: 12px 20px;
+        font-size: 1em;
+    }
+}
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <h2>💰 記帳管理</h2>
+    <div class="action-buttons">
+        <a href="#" class="btn-revenue" onclick="ModalUtils.showModal('revenueModal')">
+            💰 營業額登記
+        </a>
+        <a href="#" class="btn-expense" onclick="ModalUtils.showModal('expenseModal')">
+            💸 支出
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- 篩選區域 -->
+<div class="filter-section">
+    <div class="filter-container">
+        <h3>📅 月份篩選</h3>
+        <form method="GET" class="filter-form">
+            <select name="year" class="filter-select">
+                {% for year in years %}
+                <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}年</option>
+                {% endfor %}
+            </select>
+            <select name="month" class="filter-select">
+                {% for month_num, month_name in months %}
+                <option value="{{ month_num }}" {% if month_num == selected_month %}selected{% endif %}>{{ month_name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="filter-btn">
+                🔍 篩選
+            </button>
+            <a href="{% url 'sales_management' %}" class="filter-btn" style="text-decoration: none;">
+                🔄 重置
+            </a>
+        </form>
+        <div class="current-period">
+            目前顯示: {{ selected_year }}年{{ current_month_name }}
+        </div>
+    </div>
+</div>
+
+<!-- 左右分區布局 -->
+<div class="records-container">
+    <!-- 左側：收入記錄 -->
+    <div class="records-section income-section">
+        <div class="section-header">
+            <h3>💰 收入記錄</h3>
+            <div class="section-total">本月總計: ${{ sales_total|floatformat:2 }}</div>
+        </div>
+        
+        {% if filtered_sales %}
+        <table class="records-table">
+            <thead>
+                <tr>
+                    <th>金額</th>
+                    <th>地點</th>
+                    <th>日期</th>
+                    <th>備註</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in filtered_sales %}
+                <tr>
+                    <td class="amount-cell">${{ sale.amount|floatformat:2 }}</td>
+                    <td class="location-cell">{% if sale.category %}{{ sale.category }}{% endif %}</td>
+                    <td class="date-cell">{{ sale.date|date:"m-d H:i" }}</td>
+                    <td class="notes-cell">{% if sale.notes %}{{ sale.notes }}{% endif %}</td>
+                    <td class="action-cell">
+                        <a href="#" class="btn btn-warning" onclick="editSale({{ sale.id }}, {{ sale.amount }}, '{{ sale.category|default:"" }}', '{{ sale.date|date:"Y-m-d" }}', '{{ sale.date|date:"H:i" }}', '{{ sale.notes|default:"" }}')" title="編輯">✏️</a>
+                        <a href="#" class="btn btn-danger" onclick="deleteSale({{ sale.id }})" title="刪除">🗑️</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <h4>📊 暫無收入記錄</h4>
+            <p>點擊「營業額登記」開始記錄收入</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- 右側：支出記錄 -->
+    <div class="records-section expense-section">
+        <div class="section-header">
+            <h3>💸 支出記錄</h3>
+            <div class="section-total">本月總計: ${{ expenses_total|floatformat:2 }}</div>
+        </div>
+        
+        {% if filtered_expenses %}
+        <table class="records-table">
+            <thead>
+                <tr>
+                    <th>成本</th>
+                    <th>內容</th>
+                    <th>類別</th>
+                    <th>日期</th>
+                    <th>備註</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for expense in filtered_expenses %}
+                <tr>
+                    <td class="amount-cell expense-amount">${{ expense.amount|floatformat:2 }}</td>
+                    <td class="content-cell">{{ expense.item_name }}</td>
+                    <td class="category-cell">{% if expense.category %}{{ expense.category }}{% endif %}</td>
+                    <td class="date-cell">{{ expense.date|date:"m-d H:i" }}</td>
+                    <td class="notes-cell">{% if expense.notes %}{{ expense.notes }}{% endif %}</td>
+                    <td class="action-cell">
+                        <a href="#" class="btn btn-warning" onclick="editExpense({{ expense.id }}, {{ expense.amount }}, '{{ expense.item_name }}', '{{ expense.category|default:"" }}', '{{ expense.date|date:"Y-m-d" }}', '{{ expense.date|date:"H:i" }}', '{{ expense.notes|default:"" }}')" title="編輯">✏️</a>
+                        <a href="#" class="btn btn-danger" onclick="deleteExpense({{ expense.id }})" title="刪除">🗑️</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <h4>💸 暫無支出記錄</h4>
+            <p>點擊「支出」開始記錄支出</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 營業額登記模態框 -->
+<div id="revenueModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>💰 營業額登記</h3>
+            <span class="close" onclick="ModalUtils.hideModal('revenueModal')">&times;</span>
+        </div>
+        <form method="POST" action="{% url 'add_revenue' %}" id="revenueForm">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="amount">金額 *</label>
+                    <input type="number" id="amount" name="amount" class="form-control" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">地點</label>
+                    <input type="text" id="category" name="category" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="notes">備註</label>
+                    <textarea id="notes" name="notes" class="form-control" rows="3" placeholder="可選填寫額外說明..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="ModalUtils.hideModal('revenueModal')">×</button>
+                <button type="submit" class="btn btn-success">✓</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 支出登記模態框 -->
+<div id="expenseModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>💸 支出登記</h3>
+            <span class="close" onclick="ModalUtils.hideModal('expenseModal')">&times;</span>
+        </div>
+        <form method="POST" action="{% url 'add_expense' %}" id="expenseForm">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="expense_item">項目名稱 *</label>
+                    <input type="text" id="expense_item" name="expense_item" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="expense_amount">成本 *</label>
+                    <input type="number" id="expense_amount" name="expense_amount" class="form-control" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="expense_category">類別</label>
+                    <input type="text" id="expense_category" name="expense_category" class="form-control" placeholder="例如：日常支出、食材採購、設備維護等">
+                </div>
+                <div class="form-group">
+                    <label for="expense_notes">備註</label>
+                    <textarea id="expense_notes" name="expense_notes" class="form-control" rows="3" placeholder="可選填寫額外說明..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="ModalUtils.hideModal('expenseModal')">×</button>
+                <button type="submit" class="btn btn-danger">✓</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 編輯收入記錄模態框 -->
+<div id="editSaleModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>✏️ 編輯收入記錄</h3>
+            <span class="close" onclick="ModalUtils.hideModal('editSaleModal')">&times;</span>
+        </div>
+        <form method="POST" id="editSaleForm">
+            {% csrf_token %}
+            <input type="hidden" id="edit_sale_id" name="sale_id">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="edit_sale_amount">金額 *</label>
+                    <input type="number" id="edit_sale_amount" name="amount" class="form-control" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_sale_category">地點</label>
+                    <input type="text" id="edit_sale_category" name="category" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="edit_sale_date">日期 *</label>
+                    <input type="date" id="edit_sale_date" name="date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_sale_time">時間 *</label>
+                    <input type="time" id="edit_sale_time" name="time" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_sale_notes">備註</label>
+                    <textarea id="edit_sale_notes" name="notes" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="ModalUtils.hideModal('editSaleModal')">×</button>
+                <button type="submit" class="btn btn-success">✓</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 編輯支出記錄模態框 -->
+<div id="editExpenseModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>✏️ 編輯支出記錄</h3>
+            <span class="close" onclick="ModalUtils.hideModal('editExpenseModal')">&times;</span>
+        </div>
+        <form method="POST" id="editExpenseForm">
+            {% csrf_token %}
+            <input type="hidden" id="edit_expense_id" name="expense_id">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="edit_expense_item">項目名稱 *</label>
+                    <input type="text" id="edit_expense_item" name="expense_item" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_expense_amount">成本 *</label>
+                    <input type="number" id="edit_expense_amount" name="expense_amount" class="form-control" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_expense_category">類別</label>
+                    <input type="text" id="edit_expense_category" name="expense_category" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="edit_expense_date">日期 *</label>
+                    <input type="date" id="edit_expense_date" name="date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_expense_time">時間 *</label>
+                    <input type="time" id="edit_expense_time" name="time" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_expense_notes">備註</label>
+                    <textarea id="edit_expense_notes" name="expense_notes" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="ModalUtils.hideModal('editExpenseModal')">×</button>
+                <button type="submit" class="btn btn-success">✓</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+// 刪除銷售記錄
+function deleteSale(saleId) {
+    Utils.confirm('確定要刪除這筆營業額記錄嗎？', function() {
+        window.location.href = `/dashboard/sales/sale/${saleId}/delete/`;
+    });
+}
+
+// 刪除支出記錄
+function deleteExpense(expenseId) {
+    Utils.confirm('確定要刪除這筆支出記錄嗎？', function() {
+        window.location.href = `/dashboard/sales/expense/${expenseId}/delete/`;
+    });
+}
+
+// 編輯收入記錄
+function editSale(id, amount, category, date, time, notes) {
+    document.getElementById('edit_sale_id').value = id;
+    document.getElementById('edit_sale_amount').value = amount;
+    document.getElementById('edit_sale_category').value = category;
+    document.getElementById('edit_sale_date').value = date;
+    document.getElementById('edit_sale_time').value = time;
+    document.getElementById('edit_sale_notes').value = notes;
+    
+    // 設置表單提交地址
+    document.getElementById('editSaleForm').action = `/dashboard/sales/sale/${id}/edit/`;
+    
+    ModalUtils.showModal('editSaleModal');
+}
+
+// 編輯支出記錄
+function editExpense(id, amount, itemName, category, date, time, notes) {
+    document.getElementById('edit_expense_id').value = id;
+    document.getElementById('edit_expense_amount').value = amount;
+    document.getElementById('edit_expense_item').value = itemName;
+    document.getElementById('edit_expense_category').value = category;
+    document.getElementById('edit_expense_date').value = date;
+    document.getElementById('edit_expense_time').value = time;
+    document.getElementById('edit_expense_notes').value = notes;
+    
+    // 設置表單提交地址
+    document.getElementById('editExpenseForm').action = `/dashboard/sales/expense/${id}/edit/`;
+    
+    ModalUtils.showModal('editExpenseModal');
+}
+
+// 表單驗證
+document.getElementById('revenueForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const amount = document.getElementById('amount').value;
+    if (!amount || parseFloat(amount) <= 0) {
+        Utils.showMessage('請輸入有效的成本', 'error');
+        return;
+    }
+    this.submit();
+});
+
+document.getElementById('expenseForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const itemName = document.getElementById('expense_item').value.trim();
+    const amount = document.getElementById('expense_amount').value;
+    if (!itemName) {
+        Utils.showMessage('請輸入項目名稱', 'error');
+        return;
+    }
+    if (!amount || parseFloat(amount) <= 0) {
+        Utils.showMessage('請輸入有效的成本', 'error');
+        return;
+    }
+    this.submit();
+});
+
+// 編輯表單驗證
+document.getElementById('editSaleForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const amount = document.getElementById('edit_sale_amount').value;
+    const date = document.getElementById('edit_sale_date').value;
+    const time = document.getElementById('edit_sale_time').value;
+    
+    if (!amount || parseFloat(amount) <= 0) {
+        Utils.showMessage('請輸入有效的成本', 'error');
+        return;
+    }
+    
+    if (!date) {
+        Utils.showMessage('請選擇日期', 'error');
+        return;
+    }
+    
+    if (!time) {
+        Utils.showMessage('請選擇時間', 'error');
+        return;
+    }
+    
+    this.submit();
+});
+
+document.getElementById('editExpenseForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const itemName = document.getElementById('edit_expense_item').value.trim();
+    const amount = document.getElementById('edit_expense_amount').value;
+    const date = document.getElementById('edit_expense_date').value;
+    const time = document.getElementById('edit_expense_time').value;
+    
+    if (!itemName) {
+        Utils.showMessage('請輸入項目名稱', 'error');
+        return;
+    }
+    
+    if (!amount || parseFloat(amount) <= 0) {
+        Utils.showMessage('請輸入有效的成本', 'error');
+        return;
+    }
+    
+    if (!date) {
+        Utils.showMessage('請選擇日期', 'error');
+        return;
+    }
+    
+    if (!time) {
+        Utils.showMessage('請選擇時間', 'error');
+        return;
+    }
+    
+    this.submit();
+});
+{% endblock %}

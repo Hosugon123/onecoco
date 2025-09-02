@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: onecoco-malatang
+    env: python
+    plan: free
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+      python manage.py migrate
+    startCommand: gunicorn onecoco.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        value: onecoco-malatang.onrender.com
+      - key: DB_NAME
+        value: onecoco
+      - key: DB_USER
+        value: onecoco_user
+      - key: DB_PASSWORD
+        generateValue: true
+      - key: DB_HOST
+        value: your-postgres-host
+      - key: DB_PORT
+        value: 5432
+

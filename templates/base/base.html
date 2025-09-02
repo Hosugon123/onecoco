@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}一口口麻辣串記帳系統{% endblock %}</title>
+    
+    <!-- 全局主題樣式 -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/global-theme.css' %}">
+    
+    <!-- 頁面特定樣式 -->
+    {% block extra_css %}{% endblock %}
+    
+    <style>
+        /* 頁面特定樣式可以在此添加 */
+        {% block page_css %}{% endblock %}
+        
+        /* 強制主題樣式 - 測試用 */
+        [data-theme="dark"] {
+            background: #0f0f23 !important;
+            color: #e8e8e8 !important;
+        }
+        
+        [data-theme="dark"] body {
+            background: #0f0f23 !important;
+            color: #e8e8e8 !important;
+        }
+        
+        [data-theme="dark"] .container {
+            background: #0f0f23 !important;
+            color: #e8e8e8 !important;
+        }
+        
+        [data-theme="dark"] .main-content {
+            background: #0f0f23 !important;
+            color: #e8e8e8 !important;
+        }
+        
+        [data-theme="dark"] .card,
+        [data-theme="dark"] .page-header,
+        [data-theme="dark"] .filter-section,
+        [data-theme="dark"] .records-section,
+        [data-theme="dark"] .users-table,
+        [data-theme="dark"] .profit-card {
+            background: #16213e !important;
+            color: #e8e8e8 !important;
+            border: 2px solid #2a2a3e !important;
+        }
+        
+        [data-theme="dark"] * {
+            background-color: #0f0f23 !important;
+            color: #e8e8e8 !important;
+        }
+        
+        [data-theme="dark"] .card,
+        [data-theme="dark"] .page-header,
+        [data-theme="dark"] .filter-section,
+        [data-theme="dark"] .records-section,
+        [data-theme="dark"] .users-table,
+        [data-theme="dark"] .profit-card {
+            background: #16213e !important;
+            color: #e8e8e8 !important;
+            border: 2px solid #2a2a3e !important;
+        }
+        
+        /* 淺色主題重置 */
+        body:not([data-theme="dark"]) {
+            background: #f5f7fa !important;
+            color: #333 !important;
+        }
+        
+        body:not([data-theme="dark"]) * {
+            background-color: transparent !important;
+            color: #333 !important;
+        }
+        
+        body:not([data-theme="dark"]) .card,
+        body:not([data-theme="dark"]) .page-header,
+        body:not([data-theme="dark"]) .filter-section,
+        body:not([data-theme="dark"]) .records-section,
+        body:not([data-theme="dark"]) .users-table,
+        body:not([data-theme="dark"]) .profit-card {
+            background: white !important;
+            color: #333 !important;
+            border: 1px solid #e9ecef !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h1>🔥 一口口麻辣串記帳系統</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    🏠 首頁
+                </a>
+                <a href="{% url 'sales_management' %}" class="{% if request.resolver_match.url_name == 'sales_management' %}active{% endif %}">
+                    📊 記帳管理
+                </a>
+                <a href="{% url 'cost_management' %}" class="{% if request.resolver_match.url_name == 'cost_management' %}active{% endif %}">
+                    💰 成本管理
+                </a>
+                <a href="{% url 'profit_analysis' %}" class="{% if request.resolver_match.url_name == 'profit_analysis' %}active{% endif %}">
+                    📈 利潤分析
+                </a>
+                <a href="{% url 'user_management' %}" class="{% if request.resolver_match.url_name == 'user_management' %}active{% endif %}">
+                    👥 用戶管理
+                </a>
+                <a href="{% url 'custom_logout' %}">
+                    🚪 登出
+                </a>
+                <!-- 主題切換按鈕整合到導航欄 -->
+                <button class="theme-toggle" id="theme-toggle-btn">
+                    <span id="theme-icon">🌙</span>
+                    <span id="theme-text">深色</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 主內容區域 -->
+    <div class="container">
+        <!-- 消息顯示區域 -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- 頁面標題 -->
+        {% block page_header %}{% endblock %}
+        
+        <!-- 頁面內容 -->
+        <div class="main-content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    
+    <!-- 全局JavaScript -->
+    {% load static %}
+    <script src="{% static 'js/global-theme.js' %}"></script>
+    
+    <!-- 頁面特定JavaScript -->
+    {% block extra_js %}{% endblock %}
+    
+    <script>
+        // 頁面特定JavaScript可以在此添加
+        {% block page_js %}{% endblock %}
+    </script>
+</body>
+</html>

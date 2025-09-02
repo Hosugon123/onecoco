@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>儀表板 - 一口口麻辣串記帳系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        /* 主題切換按鈕 */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 12px 20px;
+            color: white;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        /* 深色主題樣式 */
+        [data-theme="dark"] {
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --bg-nav: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            --text-primary: #e8e8e8;
+            --text-secondary: #b8b8cc;
+            --text-muted: #8a8a9a;
+            --border-color: #2a2a3e;
+            --shadow: rgba(0, 0, 0, 0.4);
+            --accent-purple: #6366f1;
+            --accent-blue: #3b82f6;
+        }
+        
+        [data-theme="dark"] body {
+            background: var(--bg-primary) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] .container {
+            background: var(--bg-primary) !important;
+        }
+        
+        [data-theme="dark"] .main-content {
+            background: var(--bg-primary) !important;
+        }
+        
+        [data-theme="dark"] .content-wrapper {
+            background: var(--bg-primary) !important;
+        }
+        
+        /* 強制覆蓋所有可能的白色背景 */
+        [data-theme="dark"] {
+            background: var(--bg-primary) !important;
+        }
+        
+        [data-theme="dark"] body, [data-theme="dark"] html {
+            background: var(--bg-primary) !important;
+        }
+        
+        [data-theme="dark"] .container, [data-theme="dark"] .main-content, [data-theme="dark"] .content-wrapper {
+            background: var(--bg-primary) !important;
+        }
+        
+        /* 確保所有div元素都有深色背景 */
+        [data-theme="dark"] div {
+            background: var(--bg-primary) !important;
+        }
+        
+        /* 確保所有文字都是淺色 */
+        [data-theme="dark"] * {
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] h1, h2, h3, h4, h5, h6 {
+            color: var(--text-primary) !important;
+        }
+        
+        [data-theme="dark"] p, span, div, td, th {
+            color: var(--text-primary) !important;
+        }
+        
+        /* 修復圖片和圖標顯示 */
+        [data-theme="dark"] img {
+            filter: brightness(1.2) contrast(1.1) !important;
+        }
+        
+        [data-theme="dark"] .btn {
+            color: white !important;
+            background: var(--accent-purple) !important;
+        }
+        
+        [data-theme="dark"] .btn:hover {
+            color: white !important;
+            background: var(--accent-blue) !important;
+        }
+        
+        /* 增強區塊邊界和分隔效果 */
+        [data-theme="dark"] .card {
+            border: 2px solid var(--border-color) !important;
+            border-radius: 15px !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent-purple) !important;
+            margin: 15px !important;
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary)) !important;
+        }
+        
+        [data-theme="dark"] .navbar {
+            background: var(--bg-nav) !important;
+            border-bottom: 3px solid var(--accent-purple) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        [data-theme="dark"] .nav-logo h1 {
+            border-bottom: 2px solid var(--accent-purple) !important;
+            padding-bottom: 8px !important;
+            margin-bottom: 0 !important;
+            display: inline-block !important;
+        }
+        
+        [data-theme="dark"] .nav-logo {
+            border-bottom: 2px solid var(--accent-purple) !important;
+            padding-bottom: 8px !important;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        .nav-logo h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.95em;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: fit-content;
+        }
+        
+        .nav-menu a:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        .nav-menu a.active {
+            background: rgba(255,255,255,0.3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .welcome-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .welcome-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 2.2em;
+        }
+        
+        .welcome-section p {
+            color: #666;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .action-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+            border-top: 4px solid #667eea;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .action-card.income {
+            border-top-color: #28a745;
+        }
+        
+        .action-card.cost {
+            border-top-color: #dc3545;
+        }
+        
+        .action-card.profit {
+            border-top-color: #ffc107;
+        }
+        
+        .action-card.users {
+            border-top-color: #17a2b8;
+        }
+        
+        .action-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            display: block;
+        }
+        
+        .action-card.income .action-icon {
+            color: #28a745;
+        }
+        
+        .action-card.cost .action-icon {
+            color: #dc3545;
+        }
+        
+        .action-card.profit .action-icon {
+            color: #ffc107;
+        }
+        
+        .action-card.users .action-icon {
+            color: #17a2b8;
+        }
+        
+        .action-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        
+        .action-card p {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        
+        .action-btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .stats-overview {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .stats-overview h3 {
+            color: #667eea;
+            margin-bottom: 25px;
+            font-size: 1.5em;
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 1em;
+        }
+        
+        .recent-activity {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .recent-activity h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+        
+        .activity-list {
+            list-style: none;
+        }
+        
+        .activity-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .activity-details h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .activity-details p {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .activity-time {
+            color: #999;
+            font-size: 0.85em;
+        }
+        
+        .messages {
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主題切換按鈕 -->
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <span id="theme-icon">🌙</span>
+        <span id="theme-text">深色</span>
+    </button>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h1>🔥 一口口麻辣串記帳系統</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="{% url 'dashboard' %}" class="active">📊 儀表板</a>
+                <a href="{% url 'sales_management' %}">💰 記帳管理</a>
+                <a href="{% url 'cost_management' %}">📝 成本管理</a>
+                <a href="{% url 'profit_analysis' %}">📈 利潤分析</a>
+                <a href="{% url 'user_management' %}">👥 使用者管理</a>
+                <div class="nav-user">
+                    <span>歡迎，{{ user.username }}</span>
+                    <a href="{% url 'custom_logout' %}">登出</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="main-container">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="welcome-section">
+            <h2>歡迎回來，{{ user.username }}！</h2>
+            <p>這是您的麻辣燙店記帳系統管理後台。快速管理記帳、成本、利潤分析等核心業務功能。</p>
+        </div>
+        
+        <div class="quick-actions">
+            <div class="action-card income">
+                <span class="action-icon">💰</span>
+                <h3>記帳管理</h3>
+                <p>記錄每日銷售收入、客戶訂單、營業額統計</p>
+                <a href="{% url 'sales_management' %}" class="action-btn">開始記帳</a>
+            </div>
+            
+            <div class="action-card cost">
+                <span class="action-icon">📝</span>
+                <h3>成本管理</h3>
+                <p>管理原料成本、人工費用、營運支出等各項成本</p>
+                <a href="{% url 'cost_management' %}" class="action-btn">管理成本</a>
+            </div>
+            
+            <div class="action-card profit">
+                <span class="action-icon">📈</span>
+                <h3>利潤分析</h3>
+                <p>查看毛利計算、利潤報表、營運分析等關鍵指標</p>
+                <a href="{% url 'profit_analysis' %}" class="action-btn">分析利潤</a>
+            </div>
+            
+            <div class="action-card users">
+                <span class="action-icon">👥</span>
+                <h3>使用者管理</h3>
+                <p>管理員工帳號、權限設定、角色分配</p>
+                <a href="{% url 'user_management' %}" class="action-btn">管理使用者</a>
+            </div>
+        </div>
+        
+        <div class="stats-overview">
+            <h3>📊 今日概覽</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">{{ total_sales|default:"0" }}</div>
+                    <div class="stat-label">今日銷售筆數</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ total_revenue|default:"0" }}</div>
+                    <div class="stat-label">今日營業額</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ total_costs|default:"0" }}</div>
+                    <div class="stat-label">今日成本</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ net_profit|default:"0" }}</div>
+                    <div class="stat-label">今日淨利</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="recent-activity">
+            <h3>🕒 最近活動</h3>
+            {% if recent_users %}
+            <ul class="activity-list">
+                {% for recent_user in recent_users %}
+                <li class="activity-item">
+                    <div class="activity-info">
+                        <div class="activity-icon">
+                            {{ recent_user.username|first|upper }}
+                        </div>
+                        <div class="activity-details">
+                            <h4>新使用者註冊</h4>
+                            <p>{{ recent_user.username }} ({{ recent_user.get_role_display }})</p>
+                        </div>
+                    </div>
+                    <div class="activity-time">
+                        {{ recent_user.date_joined|date:"m-d H:i" }}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p style="text-align: center; color: #666; padding: 20px;">目前還沒有活動記錄</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script>
+        // 主題切換功能
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                themeIcon.textContent = '🌙';
+                themeText.textContent = '深色';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '☀️';
+                themeText.textContent = '淺色';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // 載入保存的主題
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                document.getElementById('theme-icon').textContent = '☀️';
+                document.getElementById('theme-text').textContent = '淺色';
+            }
+        }
+        
+        // 頁面載入時應用保存的主題
+        document.addEventListener('DOMContentLoaded', loadTheme);
+    </script>
+</body>
+</html>

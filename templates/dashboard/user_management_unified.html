@@ -1,0 +1,662 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}用戶管理 - 一口口麻辣串記帳系統{% endblock %}
+
+{% block page_css %}
+/* 用戶管理頁面特定樣式 */
+.page-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.page-header h2 {
+    font-size: 1.8em;
+    font-weight: 600;
+    margin: 0;
+}
+
+.add-user-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.add-user-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+    color: white;
+}
+
+.users-table {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.table-header h3 {
+    color: #495057;
+    font-size: 1.3em;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.table-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.search-input {
+    padding: 8px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 0.9em;
+    min-width: 200px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.filter-btn {
+    padding: 8px 15px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.users-list {
+    margin-top: 20px;
+}
+
+.user-item {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.user-item:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.user-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.user-details h4 {
+    color: #495057;
+    font-size: 1.1em;
+    font-weight: 600;
+    margin: 0 0 5px 0;
+}
+
+.user-details p {
+    color: #6c757d;
+    margin: 0;
+    font-size: 0.9em;
+}
+
+.user-status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 500;
+}
+
+.user-status.active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.user-status.inactive {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.user-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.user-detail {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-detail-label {
+    font-size: 0.85em;
+    color: #6c757d;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.user-detail-value {
+    color: #495057;
+    font-weight: 500;
+}
+
+.user-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.edit-btn {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+    color: white;
+}
+
+.delete-btn {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+    color: white;
+}
+
+.view-btn {
+    background: linear-gradient(135deg, #17a2b8, #6f42c1);
+    color: white;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+}
+
+.empty-state h4 {
+    color: #495057;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.empty-state p {
+    color: #6c757d;
+    font-size: 1em;
+}
+
+/* 模態框樣式 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: white;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px 25px;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.3em;
+    font-weight: 600;
+}
+
+.close {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close:hover {
+    color: #f0f0f0;
+    transform: scale(1.1);
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #495057;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    background: white;
+    color: #495057;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.modal-footer {
+    padding: 20px 25px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* 深色主題特定樣式 */
+[data-theme="dark"] .page-header {
+    background: var(--bg-nav) !important;
+    border: 2px solid var(--border-color) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent-purple) !important;
+}
+
+[data-theme="dark"] .users-table {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary)) !important;
+    border: 2px solid var(--border-color) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--accent-blue) !important;
+}
+
+[data-theme="dark"] .table-header {
+    border-bottom: 2px solid var(--accent-blue) !important;
+}
+
+[data-theme="dark"] .user-item {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .user-item:hover {
+    background: var(--bg-card) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] .modal-content {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary)) !important;
+    border: 3px solid var(--accent-purple) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 0 2px var(--accent-blue) !important;
+}
+
+[data-theme="dark"] .modal-header {
+    background: var(--bg-nav) !important;
+}
+
+[data-theme="dark"] .close {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .close:hover {
+    color: var(--text-secondary) !important;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .table-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+    
+    .table-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .search-input {
+        min-width: auto;
+    }
+    
+    .user-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    
+    .user-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .user-details-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .user-actions {
+        flex-wrap: wrap;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+}
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <h2>👥 用戶管理</h2>
+    <button class="add-user-btn" onclick="ModalUtils.showModal('addUserModal')">
+        ➕ 新增用戶
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="users-table">
+    <div class="table-header">
+        <h3>👤 用戶列表</h3>
+        <div class="table-controls">
+            <input type="text" class="search-input" placeholder="搜尋用戶..." id="userSearch">
+            <button class="filter-btn" onclick="filterUsers()">🔍 篩選</button>
+        </div>
+    </div>
+    
+    <div class="users-list" id="usersList">
+        {% if users %}
+            {% for user in users %}
+            <div class="user-item" data-user-id="{{ user.id }}">
+                <div class="user-header">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            {{ user.first_name|first|default:user.username|first|upper }}
+                        </div>
+                        <div class="user-details">
+                            <h4>{{ user.get_full_name|default:user.username }}</h4>
+                            <p>{{ user.email }}</p>
+                        </div>
+                    </div>
+                    <div class="user-status {% if user.is_active %}active{% else %}inactive{% endif %}">
+                        {% if user.is_active %}啟用{% else %}停用{% endif %}
+                    </div>
+                </div>
+                <div class="user-details-grid">
+                    <div class="user-detail">
+                        <span class="user-detail-label">用戶名</span>
+                        <span class="user-detail-value">{{ user.username }}</span>
+                    </div>
+                    <div class="user-detail">
+                        <span class="user-detail-label">註冊日期</span>
+                        <span class="user-detail-value">{{ user.date_joined|date:"Y-m-d" }}</span>
+                    </div>
+                    <div class="user-detail">
+                        <span class="user-detail-label">最後登入</span>
+                        <span class="user-detail-value">{{ user.last_login|date:"Y-m-d H:i"|default:"從未登入" }}</span>
+                    </div>
+                    <div class="user-detail">
+                        <span class="user-detail-label">權限</span>
+                        <span class="user-detail-value">{% if user.is_staff %}管理員{% else %}一般用戶{% endif %}</span>
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <a href="{% url 'user_detail' user.id %}" class="action-btn view-btn">
+                        👁️ 查看
+                    </a>
+                    <a href="{% url 'user_edit' user.id %}" class="action-btn edit-btn">
+                        ✏️ 編輯
+                    </a>
+                    <button class="action-btn delete-btn" onclick="deleteUser({{ user.id }})">
+                        🗑️ 刪除
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <h4>👤 暫無用戶記錄</h4>
+                <p>點擊「新增用戶」開始管理用戶</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 新增用戶模態框 -->
+<div id="addUserModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>➕ 新增用戶</h3>
+            <span class="close" onclick="ModalUtils.hideModal('addUserModal')">&times;</span>
+        </div>
+        <form method="POST" action="{% url 'custom_register' %}" id="addUserForm">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="username">用戶名 *</label>
+                    <input type="text" id="username" name="username" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">電子郵件 *</label>
+                    <input type="email" id="email" name="email" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="first_name">名字</label>
+                    <input type="text" id="first_name" name="first_name" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="last_name">姓氏</label>
+                    <input type="text" id="last_name" name="last_name" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="password">密碼 *</label>
+                    <input type="password" id="password" name="password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="is_staff">管理員權限</label>
+                    <input type="checkbox" id="is_staff" name="is_staff" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="ModalUtils.hideModal('addUserModal')">取消</button>
+                <button type="submit" class="btn btn-success">確認新增</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+// 用戶管理頁面特定JavaScript
+
+// 篩選用戶
+function filterUsers() {
+    const searchInput = document.getElementById('userSearch');
+    const userItems = document.querySelectorAll('.user-item');
+    const filter = searchInput.value.toLowerCase();
+    
+    userItems.forEach(item => {
+        const name = item.querySelector('h4').textContent.toLowerCase();
+        const email = item.querySelector('p').textContent.toLowerCase();
+        const username = item.querySelector('.user-detail-value').textContent.toLowerCase();
+        
+        if (name.includes(filter) || email.includes(filter) || username.includes(filter)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+// 刪除用戶
+function deleteUser(userId) {
+    Utils.confirm('確定要刪除這個用戶嗎？此操作無法復原。', function() {
+        window.location.href = `/dashboard/users/${userId}/delete/`;
+    });
+}
+
+// 表單驗證
+document.getElementById('addUserForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    
+    if (!username) {
+        Utils.showMessage('請輸入用戶名', 'error');
+        return;
+    }
+    
+    if (!email) {
+        Utils.showMessage('請輸入電子郵件', 'error');
+        return;
+    }
+    
+    if (!password || password.length < 6) {
+        Utils.showMessage('密碼至少需要6個字符', 'error');
+        return;
+    }
+    
+    this.submit();
+});
+
+// 搜尋功能
+document.getElementById('userSearch').addEventListener('input', function() {
+    filterUsers();
+});
+
+// 用戶項目動畫
+document.addEventListener('DOMContentLoaded', function() {
+    const userItems = document.querySelectorAll('.user-item');
+    
+    userItems.forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            item.style.transition = 'all 0.5s ease';
+            item.style.opacity = '1';
+            item.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+{% endblock %}
