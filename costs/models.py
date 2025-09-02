@@ -28,6 +28,16 @@ class Cost(models.Model):
         help_text='成本'
     )
     
+    selling_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        null=True,
+        blank=True,
+        verbose_name='售價',
+        help_text='商品售價（可選）'
+    )
+    
     description = models.CharField(
         max_length=200,
         verbose_name='說明',
